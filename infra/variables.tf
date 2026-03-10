@@ -8,3 +8,8 @@ variable "region" {
   type        = string
   default     = "us-central1"
 }
+
+variable "image_tag" {
+  description = "Docker image tag"
+  type        = string
+}

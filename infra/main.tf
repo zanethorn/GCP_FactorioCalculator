@@ -18,6 +18,23 @@ resource "google_artifact_registry_repository" "recipes" {
   format        = "DOCKER"
 }
 
+resource "google_cloud_run_v2_service" "read_api" {
+  name     = "read-api"
+  location = var.region
+
+  template {
+    containers {
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/recipes/read-api:${var.image_tag}"
+      env {
+        name  = "PROJECT_ID"
+        value = var.project_id
+      }
+    }
+
+    service_account = google_service_account.read_api.email
+  }
+}
+
 
 # --- Enable APIs ---
 
