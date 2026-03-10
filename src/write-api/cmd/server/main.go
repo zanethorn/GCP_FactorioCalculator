@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	pubsub "cloud.google.com/go/pubsub/v2"
 	"factorio-recipes/shared/models"
 	sharedpub "factorio-recipes/shared/pubsub"
 	"github.com/gorilla/mux"
@@ -13,7 +14,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	topic, err := sharedpub.NewPublisher(ctx)
+	publisher, err := sharedpub.NewPublisher(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,7 +25,7 @@ func main() {
 		json.NewDecoder(r.Body).Decode(&recipe)
 
 		data, _ := json.Marshal(recipe)
-		topic.Publish(r.Context(), &pubsub.Message{Data: data})
+		publisher.Publish(r.Context(), &pubsub.Message{Data: data})
 
 		w.WriteHeader(http.StatusAccepted)
 	}).Methods("PUT")

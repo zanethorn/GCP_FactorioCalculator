@@ -35,6 +35,63 @@ resource "google_cloud_run_v2_service" "read_api" {
   }
 }
 
+resource "google_cloud_run_v2_service" "write_api" {
+  name     = "write-api"
+  location = var.region
+
+  template {
+    containers {
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/recipes/write-api:${var.image_tag}"
+
+      env {
+        name  = "PROJECT_ID"
+        value = var.project_id
+      }
+
+      env {
+        name  = "PUBSUB_TOPIC"
+        value = google_pubsub_topic.recipe_writes.name
+      }
+    }
+
+    service_account = google_service_account.write_api.email
+  }
+}
+
+resource "google_cloud_run_v2_service" "worker" {
+  name     = "worker"
+  location = var.region
+
+  template {
+    containers {
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/recipes/worker:${var.image_tag}"
+
+      env {
+        name  = "PROJECT_ID"
+        value = var.project_id
+      }
+    }
+
+    service_account = google_service_account.worker.email
+  }
+}
+
+resource "google_cloud_run_v2_job" "worker_trigger" {
+  name     = "worker-trigger"
+  location = var.region
+
+  template {
+    template {
+      containers {
+        image = google_cloud_run_v2_service.worker.template[0].containers[0].image
+      }
+      service_account = google_service_account.worker.email
+    }
+  }
+}
+
+
+
 
 # --- Enable APIs ---
 
@@ -78,6 +135,12 @@ resource "google_pubsub_subscription" "recipe_writes_sub" {
   topic = google_pubsub_topic.recipe_writes.name
 
   ack_deadline_seconds = 30
+  push_config {
+    push_endpoint = google_cloud_run_v2_service.worker.uri
+    oidc_token {
+      service_account_email = google_service_account.worker.email
+    }
+  }
 }
 
 

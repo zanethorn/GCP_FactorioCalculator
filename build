@@ -1,0 +1,24 @@
+#!/bin/bash
+
+
+source .env
+
+cd $PROJECT_ROOT/src/shared
+go mod tidy
+cd $PROJECT_ROOT/src/read-api
+go mod tidy
+cd $PROJECT_ROOT/src/write-api
+go mod tidy
+cd $PROJECT_ROOT/src/worker
+go mod tidy
+cd $PROJECT_ROOT
+
+# build read-api
+docker build -t read-api:local -f $PROJECT_ROOT/src/read-api/Dockerfile $PROJECT_ROOT
+
+# build write-api
+docker build -t write-api:local -f $PROJECT_ROOT/src/write-api/Dockerfile $PROJECT_ROOT
+
+# build worker
+docker build -t worker:local -f $PROJECT_ROOT/src/worker/Dockerfile $PROJECT_ROOT
+

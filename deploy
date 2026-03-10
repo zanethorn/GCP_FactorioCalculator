@@ -1,0 +1,12 @@
+#!/bin/bash
+
+
+./build
+
+docker push us-central1-docker.pkg.dev/$PROJECT/recipes/read-api:$SHA
+docker push us-central1-docker.pkg.dev/$PROJECT/recipes/write-api:$SHA
+docker push us-central1-docker.pkg.dev/$PROJECT/recipes/worker:$SHA
+
+terraform apply -auto-approve \
+    -var="project_id=$PROJECT" \
+    -var="image_tag=$SHA"

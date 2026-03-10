@@ -1,12 +1,13 @@
 package pubsub
 
 import (
-	"cloud.google.com/go/pubsub"
 	"context"
 	"os"
+
+	pubsub "cloud.google.com/go/pubsub/v2"
 )
 
-func NewPublisher(ctx context.Context) (*pubsub.Topic, error) {
+func NewPublisher(ctx context.Context) (*pubsub.Publisher, error) {
 	projectID := os.Getenv("PROJECT_ID")
 	topicName := os.Getenv("PUBSUB_TOPIC")
 
@@ -15,5 +16,5 @@ func NewPublisher(ctx context.Context) (*pubsub.Topic, error) {
 		return nil, err
 	}
 
-	return client.Topic(topicName), nil
+	return client.Publisher(topicName), nil
 }
