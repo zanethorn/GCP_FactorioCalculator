@@ -1,3 +1,9 @@
+package validation
+
+import (
+	"errors"
+	. "shared/models"
+)
 
 func ValidateRecipe(r Recipe) error {
 	if r.Name == "" {

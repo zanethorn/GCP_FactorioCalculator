@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   firestore:
-    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:emulators
     command: >
       gcloud beta emulators firestore start
       --host-port=0.0.0.0:8081
@@ -10,7 +10,7 @@ services:
       - "8081:8081"
 
   pubsub:
-    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:emulators
     command: >
       gcloud beta emulators pubsub start
       --host-port=0.0.0.0:8085
@@ -22,7 +22,7 @@ services:
       context: .
       dockerfile: src/read-api/Dockerfile
     environment:
-      PROJECT_ID: local-project
+      PROJECT_ID: ${PROJECT_ID}
       FIRESTORE_EMULATOR_HOST: firestore:8081
     ports:
       - "8080:8080"
@@ -34,7 +34,7 @@ services:
       context: .
       dockerfile: src/write-api/Dockerfile
     environment:
-      PROJECT_ID: local-project
+      PROJECT_ID: ${PROJECT_ID}
       PUBSUB_EMULATOR_HOST: pubsub:8085
       PUBSUB_TOPIC: recipe-writes
     ports:
@@ -47,7 +47,7 @@ services:
       context: .
       dockerfile: src/worker/Dockerfile
     environment:
-      PROJECT_ID: local-project
+      PROJECT_ID: ${PROJECT_ID}
       FIRESTORE_EMULATOR_HOST: firestore:8081
       PUBSUB_EMULATOR_HOST: pubsub:8085
     depends_on:
